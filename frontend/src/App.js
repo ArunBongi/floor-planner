@@ -651,16 +651,47 @@ const App = () => {
 
   const deleteRoomFromServer = async (id) => {
     try {
+      // For rooms that are not yet synced with the server (local only)
+      if (typeof id === 'number') {
+        setRooms(prevRooms => prevRooms.filter(room => room.id !== id));
+        if (selectedRoomId === id) {
+          setSelectedRoomId(null);
+        }
+        return;
+      }
+
       const response = await fetch(`${API_URL}/rooms/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       if (!response.ok) {
-        throw new Error('Failed to delete room');
+        throw new Error(`Failed to delete room: ${response.statusText}`);
+      }
+      
+      // Remove room from local state only after successful server deletion
+      setRooms(prevRooms => prevRooms.filter(room => room.id !== id));
+      if (selectedRoomId === id) {
+        setSelectedRoomId(null);
       }
     } catch (error) {
       console.error('Error deleting room:', error);
       throw error;
+    }
+  };
+
+  const safeDeleteRoom = async (id) => {
+    try {
+      if (!id) {
+        console.error('Invalid room ID');
+        return;
+      }
+      await deleteRoomFromServer(id);
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      alert('Failed to delete room. Please try again.');
     }
   };
 
@@ -815,20 +846,6 @@ const App = () => {
 
     // Update server
     await updateRoomPosition(id, newLeft, newTop);
-  };
-
-  // Update deleteRoom function to use backend
-  const safeDeleteRoom = async (id) => {
-    try {
-      await deleteRoomFromServer(id);
-      setRooms(rooms.filter(room => room.id !== id));
-      if (selectedRoomId === id) {
-        setSelectedRoomId(null);
-      }
-    } catch (error) {
-      console.error('Error deleting room:', error);
-      alert('Failed to delete room. Please try again.');
-    }
   };
 
   const calculateNextPosition = useCallback((width, length) => {

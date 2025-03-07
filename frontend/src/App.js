@@ -2,8 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import './FloorPlan.css';
 
-// Add API URL constant
-const API_URL = 'http://localhost:3001/api';
+// Update API URL to handle both local development and production
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://arunbongi.github.io/floor-planner/api'
+  : 'http://localhost:3001/api';
 
 // Utility functions
 const pxToCm = (px) => Math.round(px / 3.78); // 1cm ≈ 3.78px
@@ -779,7 +781,7 @@ const App = () => {
     }
   }, []);
 
-  // Update addRoom function to use backend
+  // Update addRoom function to handle local-only rooms when backend is not available
   const addRoom = async () => {
     let roomInfo;
     
@@ -805,18 +807,47 @@ const App = () => {
     const { top, left } = calculateNextPosition(roomInfo.width, roomInfo.length);
     
     try {
+      // For GitHub Pages deployment, use local state only
+      if (process.env.NODE_ENV === 'production') {
+        const newRoom = {
+          ...roomInfo,
+          id: nextId,
+          top,
+          left,
+          rotation: 0
+        };
+        setRooms(prevRooms => [...prevRooms, newRoom]);
+        setNextId(prevId => prevId + 1);
+        setSelectedRoomId(newRoom.id);
+        resetForm();
+        return;
+      }
+
+      // Try to save to backend server if in development
       const savedRoom = await addRoomToServer({
         ...roomInfo,
         top,
         left,
       });
 
-      setRooms([...rooms, { ...savedRoom, id: savedRoom._id }]);
+      setRooms(prevRooms => [...prevRooms, { ...savedRoom, id: savedRoom._id }]);
       setNextId(savedRoom._id + 1);
-      resetForm();
       setSelectedRoomId(savedRoom._id);
+      resetForm();
     } catch (error) {
-      alert('Failed to add room. Please try again.');
+      console.error('Error adding room:', error);
+      // Fallback to local state if server fails
+      const newRoom = {
+        ...roomInfo,
+        id: nextId,
+        top,
+        left,
+        rotation: 0
+      };
+      setRooms(prevRooms => [...prevRooms, newRoom]);
+      setNextId(prevId => prevId + 1);
+      setSelectedRoomId(newRoom.id);
+      resetForm();
     }
   };
 

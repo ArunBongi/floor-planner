@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/floor-planner/static/css/main.0c2d5aba.css",
-    "main.js": "/floor-planner/static/js/main.90af4494.js",
+    "main.js": "/floor-planner/static/js/main.7aa029da.js",
     "static/js/453.8ab44547.chunk.js": "/floor-planner/static/js/453.8ab44547.chunk.js",
     "index.html": "/floor-planner/index.html",
     "main.0c2d5aba.css.map": "/floor-planner/static/css/main.0c2d5aba.css.map",
-    "main.90af4494.js.map": "/floor-planner/static/js/main.90af4494.js.map",
+    "main.7aa029da.js.map": "/floor-planner/static/js/main.7aa029da.js.map",
     "453.8ab44547.chunk.js.map": "/floor-planner/static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0c2d5aba.css",
-    "static/js/main.90af4494.js"
+    "static/js/main.7aa029da.js"
   ]
 }

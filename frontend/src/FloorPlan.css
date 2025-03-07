@@ -1,0 +1,577 @@
+/* Main floor plan canvas */
+.floor-plan-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+    margin: auto;
+}
+
+/* Room styling */
+.room {
+    position: absolute;
+    border: 2px solid #2c3e50;
+    cursor: move;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    z-index: 1;
+}
+
+.room.selected {
+    box-shadow: 0 0 0 2px #3498db, 0 0 15px rgba(52, 152, 219, 0.3);
+    z-index: 10;
+}
+
+/* Grid background for better alignment */
+.floor-plan-canvas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+}
+
+/* Main content layout */
+.main-content {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+    padding: 20px;
+}
+
+.sidebar {
+    flex: 0 0 300px;
+    overflow-y: auto;
+}
+
+.floor-plan-container {
+    flex: 1;
+    overflow: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Enhanced Room label */
+.room-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    color: #2c3e50;
+    pointer-events: none;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    z-index: 10;
+    letter-spacing: 0.5px;
+}
+
+/* Room dimensions text */
+.room-dimensions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 12px;
+    color: #2c3e50;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 3px;
+    pointer-events: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Rotation handle */
+.rotate-handle {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 2px solid #666;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.rotate-handle svg {
+    width: 16px;
+    height: 16px;
+    color: #666;
+}
+
+.rotate-handle:hover {
+    background-color: #f0f0f0;
+}
+
+/* Dimension indicators */
+.dimension-indicators {
+    position: absolute;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+}
+
+.dimension-indicator {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.width-indicator {
+    top: -25px;
+    left: 0;
+    width: 100%;
+}
+
+.height-indicator {
+    top: 0;
+    right: -25px;
+    height: 100%;
+    flex-direction: column;
+}
+
+.dimension-line {
+    background-color: #4a6fa5;
+    position: relative;
+}
+
+.width-indicator .dimension-line {
+    height: 2px;
+    width: calc(100% + 10px);
+}
+
+.width-indicator .dimension-line:before,
+.width-indicator .dimension-line:after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 6px;
+    background-color: #4a6fa5;
+}
+
+.width-indicator .dimension-line:before {
+    left: 0;
+    top: -2px;
+}
+
+.width-indicator .dimension-line:after {
+    right: 0;
+    top: -2px;
+}
+
+.height-indicator .dimension-line {
+    width: 2px;
+    height: calc(100% + 10px);
+}
+
+.height-indicator .dimension-line:before,
+.height-indicator .dimension-line:after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 6px;
+    background-color: #4a6fa5;
+}
+
+.height-indicator .dimension-line:before {
+    top: 0;
+    left: -2px;
+}
+
+.height-indicator .dimension-line:after {
+    bottom: 0;
+    left: -2px;
+}
+
+.dimension-text {
+    font-size: 10px;
+    background-color: #4a6fa5;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin: 0 5px;
+}
+
+/* Walls */
+.wall {
+    position: absolute;
+    background-color: #333;
+    z-index: 5;
+}
+
+/* Blueprint view modifications */
+.blueprint .room {
+    background-color: transparent !important;
+    border: 2px solid #2196f3;
+    box-shadow: none;
+}
+
+.blueprint .wall {
+    background-color: #2196f3;
+    opacity: 0.8;
+}
+
+/* Doors styling */
+.door {
+    position: absolute;
+    background-color: transparent;
+    border: 2.5px solid #34495e;
+    z-index: 7;
+}
+
+.door-swing {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border: 2.5px solid #34495e;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 80px 0 0;
+    transform-origin: left bottom;
+    top: -80px;
+    left: 0;
+    opacity: 0.7;
+}
+
+/* Door styles for blueprint mode */
+.blueprint .door {
+    background-color: transparent;
+    border-color: #4a6fa5;
+}
+
+.blueprint .door-swing {
+    border-color: #4a6fa5;
+    opacity: 0.7;
+}
+
+/* Windows styling */
+.window {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2.5px solid #34495e;
+    z-index: 6;
+}
+
+/* Add window details */
+.window::before,
+.window::after {
+    content: '';
+    position: absolute;
+    background-color: #34495e;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.5px;
+    height: 100%;
+}
+
+.window::before {
+    left: 33%;
+}
+
+.window::after {
+    left: 67%;
+}
+
+/* Window styles for blueprint mode */
+.blueprint .window {
+    border-color: #4a6fa5;
+}
+
+.blueprint .window::before,
+.blueprint .window::after {
+    background-color: #4a6fa5;
+}
+
+/* Room connection points for better wall alignment */
+.room::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: transparent;
+    border: 2px solid #333;
+    border-radius: 50%;
+    top: -4px;
+    left: -4px;
+    z-index: 8;
+}
+
+.blueprint .room::before {
+    border-color: #4a6fa5;
+}
+
+/* Furniture components */
+.room-furniture {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Living Room Furniture */
+.sofa {
+    position: absolute;
+    background-color: #a7c0e7;
+    border: 1px solid #666;
+    height: 20%;
+    border-radius: 3px;
+}
+
+.coffee-table {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    width: 20%;
+    height: 12%;
+    border-radius: 2px;
+}
+
+.tv-stand {
+    position: absolute;
+    background-color: #8c7b6e;
+    border: 1px solid #666;
+    width: 25%;
+    height: 8%;
+    border-radius: 2px;
+}
+
+/* Kitchen Furniture */
+.kitchen-counter {
+    position: absolute;
+    background-color: #e5e5e5;
+    border: 1px solid #666;
+    height: 12%;
+    border-radius: 2px;
+}
+
+.kitchen-island {
+    position: absolute;
+    background-color: #e0e0e0;
+    border: 1px solid #666;
+    width: 25%;
+    height: 18%;
+    border-radius: 2px;
+}
+
+.fridge {
+    position: absolute;
+    background-color: #d9d9d9;
+    border: 1px solid #666;
+    width: 15%;
+    height: 15%;
+    border-radius: 2px;
+}
+
+.stove {
+    position: absolute;
+    background-color: #b7b7b7;
+    border: 1px solid #666;
+    width: 15%;
+    height: 15%;
+    border-radius: 2px;
+}
+
+/* Bedroom Furniture */
+.bed {
+    position: absolute;
+    background-color: #cdb5e0;
+    border: 1px solid #666;
+    height: 30%;
+    border-radius: 3px;
+}
+
+.nightstand {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    width: 10%;
+    height: 10%;
+    border-radius: 2px;
+}
+
+.wardrobe {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    height: 15%;
+    border-radius: 2px;
+}
+
+/* Bathroom Furniture */
+.toilet {
+    position: absolute;
+    background-color: #f5f5f5;
+    border: 1px solid #666;
+    width: 12%;
+    height: 15%;
+    border-radius: 8px 8px 2px 2px;
+}
+
+.sink {
+    position: absolute;
+    background-color: #f0f0f0;
+    border: 1px solid #666;
+    width: 15%;
+    height: 10%;
+    border-radius: 3px;
+}
+
+.shower {
+    position: absolute;
+    background-color: #d6e9f5;
+    border: 1px solid #666;
+    width: 25%;
+    height: 25%;
+    border-radius: 2px;
+}
+
+.bathtub {
+    position: absolute;
+    background-color: #e0f0f8;
+    border: 1px solid #666;
+    height: 25%;
+    border-radius: 3px;
+}
+
+/* Dining Room Furniture */
+.dining-table {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    height: 40%;
+    border-radius: 3px;
+}
+
+.sideboard {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    height: 12%;
+    border-radius: 2px;
+}
+
+/* Office Furniture */
+.desk {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    height: 20%;
+    border-radius: 2px;
+}
+
+.office-chair {
+    position: absolute;
+    background-color: #8d8d8d;
+    border: 1px solid #666;
+    width: 10%;
+    height: 10%;
+    border-radius: 50%;
+}
+
+.bookshelf {
+    position: absolute;
+    background-color: #c1a77f;
+    border: 1px solid #666;
+    height: 12%;
+    border-radius: 2px;
+}
+
+/* Updated room colors with better contrast and visual hierarchy */
+.room[data-room-type="Living Room"] {
+    background-color: rgba(187, 222, 251, 0.7);
+    border-color: #1976d2;
+}
+
+.room[data-room-type="Kitchen"] {
+    background-color: rgba(255, 224, 178, 0.7);
+    border-color: #f57c00;
+}
+
+.room[data-room-type="Bedroom"] {
+    background-color: rgba(200, 230, 201, 0.7);
+    border-color: #388e3c;
+}
+
+.room[data-room-type="Bathroom"] {
+    background-color: rgba(179, 229, 252, 0.7);
+    border-color: #0288d1;
+}
+
+.room[data-room-type="Dining Room"] {
+    background-color: rgba(255, 204, 188, 0.7);
+    border-color: #d84315;
+}
+
+.room[data-room-type="Office"] {
+    background-color: rgba(225, 190, 231, 0.7);
+    border-color: #7b1fa2;
+}
+
+/* Blueprint mode enhancements */
+.blueprint .room-label {
+    color: #2196f3;
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: none;
+}
+
+/* Door customization panel */
+.door-options-panel {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.door-position-selector {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* Animation for the Blueprint mode transition */
+@keyframes blueprintTransition {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.blueprint .room, .blueprint .wall {
+    animation: blueprintTransition 0.3s ease forwards;
+}
